@@ -2,6 +2,8 @@
 
 ## 0.46.1 - Unreleased
 
+- Gmail: expose up to 50 selected headers in message-search JSON and MCP with `--headers`, reusing existing reads and preserving sanitization and untrusted-content wrapping. (#1190, #1249) — thanks @obokaman-com.
+
 - Gmail: add opt-in `--html-from-text` (or `GOG_GMAIL_HTML_FROM_TEXT`) to generate an escaped HTML alternative for plain send, reply, and draft bodies; preserve plain-text defaults and explicit HTML. (#1251) — thanks @mathieu-ships.
 
 - Auth: make Google Ads (`ads`) an explicit opt-in instead of part of the default `user`/`all-user` set; Google can gate the Ads scope behind mandatory passkey enrollment, which blocked ordinary reauth. Request it with `--services user,ads`.

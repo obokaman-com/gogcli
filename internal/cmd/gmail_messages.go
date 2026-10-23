@@ -54,9 +54,9 @@ func (c *GmailMessagesSearchCmd) Run(ctx context.Context, flags *RootFlags) erro
 	if c.SanitizeContent && c.IncludeBody && c.BodyFormat == gmailMessageBodyFormatHTML {
 		return usage("--sanitize-content cannot be used with --body-format html")
 	}
-	headerNames, err := gmailSearchHeaderNames(c.Headers)
-	if err != nil {
-		return err
+	headerNames, headerErr := gmailSearchHeaderNames(c.Headers)
+	if headerErr != nil {
+		return headerErr
 	}
 	u := ui.FromContext(ctx)
 	if err := validateGmailMaxResults(c.Max); err != nil {
