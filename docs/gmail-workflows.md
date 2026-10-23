@@ -101,6 +101,25 @@ sender and recipient display text as untrusted, including with `--results-only`
 and `--select`. MCP `gmail_search` exposes `include_recipients` and
 `sanitize_content` with the same behavior.
 
+To include other headers in JSON results, such as mailing-list ones, name them
+with `--headers` (up to 50 names, each at most 256 bytes; printable ASCII
+without spaces or colons):
+
+```bash
+gog gmail messages search 'newer_than:7d' --headers List-Id,Sender --json |
+  jq -r '.messages[] | .headers["List-Id"]'
+```
+
+Each result gets a `headers` object keyed by the canonical header name, whatever
+case you typed: `list-id` becomes `List-Id`, and acronyms are not kept, so
+`Message-ID` becomes `Message-Id`. These are real header names, unlike the
+snake_case keys of the `headers` object in `gmail get`. A header the message
+lacks is an empty string, and a repeated one gives its first value. The headers
+come from the same per-message read, so there are no extra API calls;
+`--sanitize-content` and `--wrap-untrusted` apply to them as to the other header
+fields. Combines with `--include-recipients`. MCP `gmail_search` takes the names
+as a `headers` array.
+
 Message JSON exposes Reply-To as `headers.reply_to` in both full and default
 metadata reads. With `--sanitize-content`, use `message.headers.reply_to` (or
 `headers.reply_to` with `--results-only`); sanitized thread reads expose it in

@@ -33,6 +33,7 @@ gog gmail (mail,email) messages (message,msg,msgs) search (find,query,ls,list) <
 | `-y`<br>`--force`<br>`--assume-yes`<br>`--yes` | `bool` |  | Skip confirmations for destructive commands |
 | `--full` | `bool` |  | Show full message bodies without truncation (implies --include-body) |
 | `--gmail-no-send` | `bool` | false | Block Gmail send operations (agent safety) |
+| `--headers` | `string` |  | Include up to 50 headers in JSON output under headers (comma-separated, max 256 bytes per name; canonical keys, e.g. Message-ID becomes Message-Id; first value if repeated; no extra API calls) |
 | `-h`<br>`--help` | `kong.helpFlag` |  | Show context-sensitive help. |
 | `--home` | `string` |  | Override gogcli config/data/state/cache root (equivalent to GOG_HOME) |
 | `--include-attachments` | `bool` |  | Include each message's attachment metadata |

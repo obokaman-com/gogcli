@@ -423,7 +423,7 @@ func TestFetchMessageDetails_StopsAfterFirstError(t *testing.T) {
 	}
 
 	err := awaitFanOut(t, func() error {
-		_, err := fetchMessageDetails(context.Background(), svc, messages, map[string]string{}, time.UTC, false, gmailMessageBodyFormatText, false, false, false, false)
+		_, err := fetchMessageDetails(context.Background(), svc, messages, map[string]string{}, time.UTC, false, gmailMessageBodyFormatText, false, false, false, nil, false)
 		return err
 	})
 	var apiErr *googleapi.Error

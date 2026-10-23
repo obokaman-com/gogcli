@@ -34,8 +34,8 @@ func (s *searchStub) gets() int {
 }
 
 // newSearchStub serves one message per id. Like Gmail, metadata-format reads
-// return only the headers named in metadataHeaders, so a test cannot pass by
-// reading a header the command never asked for.
+// return only the headers named in metadataHeaders (matched case-insensitively),
+// so a test cannot pass by reading a header the command never asked for.
 func newSearchStub(t *testing.T, ids []string, htmlBody, plainBody string) (*gmail.Service, *searchStub) {
 	t.Helper()
 	stub := &searchStub{}
@@ -46,6 +46,11 @@ func newSearchStub(t *testing.T, ids []string, htmlBody, plainBody string) (*gma
 		{"name": "Bcc", "value": "Hidden https://bcc.example/p <h@four.example>"},
 		{"name": "Subject", "value": "See https://subject.example/x"},
 		{"name": "Date", "value": "Tue, 28 Jul 2026 03:36:00 +0000"},
+		{"name": "List-Id", "value": "Some Pub <somepub.substack.example>"},
+		{"name": "Sender", "value": "Group <group@example.com>"},
+		{"name": "Received", "value": "first hop"},
+		{"name": "Received", "value": "second hop"},
+		{"name": "Message-ID", "value": "<abc@mail.example>"},
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
@@ -73,7 +78,7 @@ func newSearchStub(t *testing.T, ids []string, htmlBody, plainBody string) (*gma
 				if ok {
 					h = map[string]string{"name": h["name"], "value": override}
 				}
-				if format == "metadata" && !slices.Contains(wanted, h["name"]) {
+				if format == "metadata" && !slices.ContainsFunc(wanted, func(name string) bool { return strings.EqualFold(name, h["name"]) }) {
 					continue
 				}
 				headers = append(headers, h)
@@ -130,7 +135,7 @@ func TestGmailMessagesSearch_DefaultOmitsRecipientsAndAsksForSummaryHeadersOnly(
 	if len(raw["messages"]) != 2 {
 		t.Fatalf("messages = %d, want 2", len(raw["messages"]))
 	}
-	for _, key := range []string{`"to"`, `"cc"`, `"bcc"`, `"body"`} {
+	for _, key := range []string{`"to"`, `"cc"`, `"bcc"`, `"body"`, `"headers"`} {
 		if strings.Contains(stdout, key) {
 			t.Fatalf("default output must not contain %s: %s", key, stdout)
 		}
