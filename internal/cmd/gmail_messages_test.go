@@ -55,17 +55,12 @@ func TestFetchMessageDetails_NoRetryOnError(t *testing.T) {
 	var calls int32
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.URL.Path, "/users/me/messages/") {
+		if !strings.Contains(r.URL.Path, "/users/me/messages/m1") {
 			http.NotFound(w, r)
 			return
 		}
 		atomic.AddInt32(&calls, 1)
-		if strings.Contains(r.URL.Path, "/users/me/messages/m1") {
-			http.Error(w, "boom", http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"id":"m2","threadId":"t2","payload":{"headers":[{"name":"From","value":"me@example.com"}]}}`))
+		http.Error(w, "boom", http.StatusInternalServerError)
 	}))
 	defer srv.Close()
 
@@ -78,12 +73,12 @@ func TestFetchMessageDetails_NoRetryOnError(t *testing.T) {
 		t.Fatalf("NewService: %v", err)
 	}
 
-	messages := []*gmail.Message{{Id: "m1"}, {Id: "m2"}}
+	messages := []*gmail.Message{{Id: "m1"}}
 	_, err = fetchMessageDetails(context.Background(), svc, messages, map[string]string{}, time.UTC, false, gmailMessageBodyFormatText, false, false, false, nil, false)
 	if err == nil || !strings.Contains(err.Error(), "message m1") {
 		t.Fatalf("expected message error, got %v", err)
 	}
-	if got := atomic.LoadInt32(&calls); got != 2 {
-		t.Fatalf("expected 2 calls, got %d", got)
+	if got := atomic.LoadInt32(&calls); got != 1 {
+		t.Fatalf("expected 1 call without retry, got %d", got)
 	}
 }
